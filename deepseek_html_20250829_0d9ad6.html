@@ -1,0 +1,898 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Media Pembelajaran - Topologi Jaringan</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2b7a78;
+      --primary-light: #3aafa9;
+      --primary-dark: #17252a;
+      --accent: #ff6b6b;
+      --light: #def2f1;
+      --white: #ffffff;
+      --gray: #f5f7fa;
+      --text: #333333;
+      --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      line-height: 1.6;
+      color: var(--text);
+      background-color: var(--gray);
+    }
+    
+    header {
+      background: linear-gradient(135deg, var(--primary-dark) 0%, var(--primary) 100%);
+      color: var(--white);
+      padding: 2rem 0;
+      text-align: center;
+      box-shadow: var(--shadow);
+    }
+    
+    h1 {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .subtitle {
+      font-size: 1.2rem;
+      opacity: 0.9;
+    }
+    
+    nav {
+      background-color: var(--primary-light);
+      display: flex;
+      justify-content: center;
+      gap: 0;
+      padding: 0;
+      box-shadow: var(--shadow);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    
+    nav a {
+      color: var(--white);
+      text-decoration: none;
+      font-weight: 600;
+      padding: 1rem 1.5rem;
+      transition: all 0.3s ease;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    
+    nav a:hover, nav a.active {
+      background-color: var(--primary);
+    }
+    
+    nav a i {
+      font-size: 1.2rem;
+    }
+    
+    section {
+      padding: 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    
+    h2 {
+      color: var(--primary-dark);
+      margin-bottom: 1.5rem;
+      padding-bottom: 0.5rem;
+      border-bottom: 2px solid var(--primary-light);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .topology-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      margin: 2rem 0;
+    }
+    
+    .topology {
+      background: var(--white);
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      transition: transform 0.3s ease;
+    }
+    
+    .topology:hover {
+      transform: translateY(-5px);
+    }
+    
+    .topology-header {
+      background-color: var(--primary);
+      color: var(--white);
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    
+    .topology-content {
+      padding: 1.5rem;
+    }
+    
+    .topology-content ul {
+      margin-left: 1.5rem;
+      margin-top: 1rem;
+    }
+    
+    .topology-content li {
+      margin-bottom: 0.5rem;
+    }
+    
+    .simulation-container {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin: 2rem 0;
+      text-align: center;
+    }
+    
+    .canvas-container {
+      width: 100%;
+      height: 300px;
+      margin: 1.5rem 0;
+      background: var(--light);
+      border-radius: 8px;
+      overflow: hidden;
+      position: relative;
+    }
+    
+    #network-canvas {
+      width: 100%;
+      height: 100%;
+    }
+    
+    .controls {
+      display: flex;
+      justify-content: center;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    button {
+      background-color: var(--primary);
+      color: var(--white);
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 50px;
+      cursor: pointer;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.3s ease;
+    }
+    
+    button:hover {
+      background-color: var(--primary-dark);
+      transform: translateY(-2px);
+    }
+    
+    .quiz {
+      background: var(--white);
+      border-radius: 10px;
+      padding: 2rem;
+      box-shadow: var(--shadow);
+      margin: 2rem 0;
+    }
+    
+    .question {
+      margin-bottom: 1.5rem;
+      font-weight: 600;
+    }
+    
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    .option {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 1rem;
+      background: var(--light);
+      border-radius: 8px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+    
+    .option:hover {
+      background: #d1e7e6;
+    }
+    
+    .option input {
+      width: 18px;
+      height: 18px;
+    }
+    
+    .feedback {
+      margin-top: 1.5rem;
+      padding: 1rem;
+      border-radius: 8px;
+      display: none;
+    }
+    
+    .correct {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+    
+    .incorrect {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+    
+    .progress-container {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      margin-top: 1.5rem;
+    }
+    
+    .progress-bar {
+      flex-grow: 1;
+      height: 10px;
+      background: var(--light);
+      border-radius: 5px;
+      overflow: hidden;
+    }
+    
+    .progress {
+      height: 100%;
+      background: var(--primary);
+      border-radius: 5px;
+      width: 0%;
+      transition: width 0.5s ease;
+    }
+    
+    footer {
+      text-align: center;
+      background-color: var(--primary-dark);
+      color: var(--white);
+      padding: 2rem;
+      margin-top: 2rem;
+    }
+    
+    @media (max-width: 768px) {
+      nav {
+        flex-wrap: wrap;
+      }
+      
+      nav a {
+        flex: 1 0 33%;
+        justify-content: center;
+        text-align: center;
+        padding: 0.8rem 0.5rem;
+        font-size: 0.9rem;
+      }
+      
+      h1 {
+        font-size: 2rem;
+      }
+      
+      .controls {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+    
+    .highlight {
+      background: linear-gradient(120deg, #a8e6cf 0%, #dcedc1 100%);
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      font-weight: 500;
+    }
+    
+    .feature {
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    
+    .feature i {
+      font-size: 1.5rem;
+      color: var(--primary);
+      margin-top: 0.3rem;
+    }
+    
+    .feature-content {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Media Pembelajaran Interaktif</h1>
+    <p class="subtitle">Topologi Jaringan - Informatika Kelas XI</p>
+  </header>
+
+  <nav>
+    <a href="#materi" class="active"><i class="fas fa-book"></i> Materi</a>
+    <a href="#simulasi"><i class="fas fa-desktop"></i> Simulasi</a>
+    <a href="#kuis"><i class="fas fa-question-circle"></i> Kuis</a>
+    <a href="#tentang"><i class="fas fa-info-circle"></i> Tentang</a>
+  </nav>
+
+  <section id="materi">
+    <h2><i class="fas fa-book-open"></i> Materi Topologi Jaringan</h2>
+    <p>Topologi jaringan adalah cara atau konsep untuk menghubungkan beberapa atau banyak komputer sekaligus menjadi suatu jaringan yang saling terkoneksi. Berikut adalah beberapa jenis topologi jaringan:</p>
+    
+    <div class="topology-container">
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-network-wired"></i>
+          <h3>Topologi Bus</h3>
+        </div>
+        <div class="topology-content">
+          <p>Topologi ini menggunakan satu kabel utama sebagai media transmisi data yang menghubungkan semua perangkat.</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Menggunakan kabel coaxial</li>
+            <li>Terminator di setiap ujung kabel</li>
+            <li>Mudah diimplementasikan</li>
+            <li>Jika kabel utama putus, seluruh jaringan down</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-ring"></i>
+          <h3>Topologi Ring</h3>
+        </div>
+        <div class="topology-content">
+          <p>Setiap perangkat terhubung ke dua perangkat lainnya, membentuk jalur melingkar (cincin).</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Data mengalir dalam satu arah</li>
+            <li>Menggunakan token passing</li>
+            <li>Lebih teratur dari topologi bus</li>
+            <li>Jika satu node rusak, seluruh jaringan terganggu</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-star"></i>
+          <h3>Topologi Star</h3>
+        </div>
+        <div class="topology-content">
+          <p>Semua perangkat terhubung ke satu titik pusat (switch atau hub).</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Paling populer digunakan</li>
+            <li>Mudah dikelola dan di-troubleshoot</li>
+            <li>Jika satu node rusak, tidak mempengaruhi node lain</li>
+            <li>Jika hub/switch rusak, seluruh jaringan down</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-project-diagram"></i>
+          <h3>Topologi Mesh</h3>
+        </div>
+        <div class="topology-content">
+          <p>Setiap perangkat terhubung langsung dengan semua perangkat lainnya.</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Redundansi tinggi</li>
+            <li>Keamanan baik</li>
+            <li>Membutuhkan banyak kabel</li>
+            <li>Biaya implementasi tinggi</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-tree"></i>
+          <h3>Topologi Tree</h3>
+        </div>
+        <div class="topology-content">
+          <p>Kombinasi dari topologi star dan bus, dengan hierarki yang jelas.</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Mudah untuk ekspansi</li>
+            <li>Pengelolaan lebih mudah</li>
+            <li>Jika backbone rusak, seluruh jaringan down</li>
+            <li>Lebih banyak kabel dibutuhkan</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="topology">
+        <div class="topology-header">
+          <i class="fas fa-random"></i>
+          <h3>Topologi Hybrid</h3>
+        </div>
+        <div class="topology-content">
+          <p>Kombinasi dari dua atau lebih topologi jaringan.</p>
+          <p><strong>Karakteristik:</strong></p>
+          <ul>
+            <li>Fleksibel dan dapat disesuaikan</li>
+            <li>Menggabungkan kelebihan berbagai topologi</li>
+            <li>Instalasi dan konfigurasi kompleks</li>
+            <li>Biaya relatif tinggi</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="simulasi">
+    <h2><i class="fas fa-desktop"></i> Simulasi Interaktif</h2>
+    <p>Jelajahi berbagai topologi jaringan melalui simulasi interaktif di bawah ini. Pilih jenis topologi dan lihat bagaimana data mengalir dalam jaringan.</p>
+    
+    <div class="simulation-container">
+      <div class="controls">
+        <button onclick="changeTopology('bus')"><i class="fas fa-network-wired"></i> Topologi Bus</button>
+        <button onclick="changeTopology('star')"><i class="fas fa-star"></i> Topologi Star</button>
+        <button onclick="changeTopology('ring')"><i class="fas fa-ring"></i> Topologi Ring</button>
+        <button onclick="startSimulation()"><i class="fas fa-play"></i> Mulai Simulasi</button>
+        <button onclick="stopSimulation()"><i class="fas fa-stop"></i> Hentikan</button>
+      </div>
+      
+      <div class="canvas-container">
+        <canvas id="network-canvas"></canvas>
+      </div>
+      
+      <p>Gunakan simulasi ini untuk memahami bagaimana data mengalir dalam berbagai jenis topologi jaringan. Perhatikan kelebihan dan kelemahan masing-masing topologi.</p>
+    </div>
+  </section>
+
+  <section id="kuis">
+    <h2><i class="fas fa-question-circle"></i> Kuis Interaktif</h2>
+    <p>Uji pemahaman Anda tentang topologi jaringan dengan kuis interaktif berikut.</p>
+    
+    <div class="quiz">
+      <div class="question" id="question">1. Topologi jaringan yang menggunakan perangkat pusat adalah?</div>
+      
+      <div class="options" id="options">
+        <label class="option">
+          <input type="radio" name="answer" value="bus">
+          <span>Topologi Bus</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="answer" value="star">
+          <span>Topologi Star</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="answer" value="ring">
+          <span>Topologi Ring</span>
+        </label>
+        <label class="option">
+          <input type="radio" name="answer" value="mesh">
+          <span>Topologi Mesh</span>
+        </label>
+      </div>
+      
+      <button onclick="checkAnswer()"><i class="fas fa-check"></i> Cek Jawaban</button>
+      
+      <div class="feedback" id="feedback"></div>
+      
+      <div class="progress-container">
+        <div class="progress-bar">
+          <div class="progress" id="progress"></div>
+        </div>
+        <span id="progress-text">0/5</span>
+      </div>
+    </div>
+  </section>
+
+  <section id="tentang">
+    <h2><i class="fas fa-info-circle"></i> Tentang Aplikasi</h2>
+    <p>Aplikasi ini dikembangkan sebagai media pembelajaran Informatika Kelas XI, membantu siswa memahami topologi jaringan secara visual dan interaktif.</p>
+    
+    <div class="feature">
+      <i class="fas fa-graduation-cap"></i>
+      <div class="feature-content">
+        <h3>Tujuan Pembelajaran</h3>
+        <p>Setelah menggunakan media pembelajaran ini, siswa diharapkan mampu:</p>
+        <ul>
+          <li>Memahami berbagai jenis topologi jaringan</li>
+          <li>Menganalisis kelebihan dan kekurangan masing-masing topologi</li>
+          <li>Memvisualisasikan cara kerja berbagai topologi jaringan</li>
+          <li>Menerapkan pengetahuan dalam merancang jaringan sederhana</li>
+        </ul>
+      </div>
+    </div>
+    
+    <div class="feature">
+      <i class="fas fa-code"></i>
+      <div class="feature-content">
+        <h3>Teknologi yang Digunakan</h3>
+        <p>Aplikasi ini dibangun menggunakan HTML5, CSS3, dan JavaScript dengan Canvas API untuk simulasi interaktif. Desain responsif memastikan pengalaman belajar yang optimal di berbagai perangkat.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>© 2025 - Media Pembelajaran Informatika XI</p>
+    <p>Dikembangkan untuk mendukung pembelajaran abad 21</p>
+  </footer>
+
+  <script>
+    // Navigation
+    document.querySelectorAll('nav a').forEach(link => {
+      link.addEventListener('click', function(e) {
+        e.preventDefault();
+        
+        // Remove active class from all links
+        document.querySelectorAll('nav a').forEach(tab => tab.classList.remove('active'));
+        
+        // Add active class to clicked link
+        this.classList.add('active');
+        
+        // Scroll to section
+        const targetId = this.getAttribute('href');
+        document.querySelector(targetId).scrollIntoView({ behavior: 'smooth' });
+      });
+    });
+    
+    // Quiz data
+    const questions = [
+      {
+        question: "Topologi jaringan yang menggunakan perangkat pusat adalah?",
+        options: ["Topologi Bus", "Topologi Star", "Topologi Ring", "Topologi Mesh"],
+        answer: 1
+      },
+      {
+        question: "Topologi yang menggunakan token passing untuk mengirim data adalah?",
+        options: ["Topologi Bus", "Topologi Star", "Topologi Ring", "Topologi Mesh"],
+        answer: 2
+      },
+      {
+        question: "Keuntungan utama topologi star adalah?",
+        options: [
+          "Murah dalam implementasi",
+          "Tidak memerlukan perangkat pusat",
+          "Jika satu node rusak, tidak mempengaruhi yang lain",
+          "Data dapat mengalir dua arah secara simultan"
+        ],
+        answer: 2
+      },
+      {
+        question: "Topologi yang merupakan kombinasi dari beberapa topologi disebut?",
+        options: [
+          "Topologi Hybrid",
+          "Topologi Tree",
+          "Topologi Mesh",
+          "Topologi Star"
+        ],
+        answer: 0
+      },
+      {
+        question: "Topologi yang membutuhkan kabel paling banyak adalah?",
+        options: [
+          "Topologi Bus",
+          "Topologi Star",
+          "Topologi Ring",
+          "Topologi Mesh"
+        ],
+        answer: 3
+      }
+    ];
+    
+    let currentQuestion = 0;
+    let score = 0;
+    
+    // Initialize quiz
+    function loadQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('question').textContent = `${currentQuestion + 1}. ${q.question}`;
+      
+      const optionsContainer = document.getElementById('options');
+      optionsContainer.innerHTML = '';
+      
+      q.options.forEach((option, index) => {
+        const label = document.createElement('label');
+        label.className = 'option';
+        label.innerHTML = `
+          <input type="radio" name="answer" value="${index}">
+          <span>${option}</span>
+        `;
+        optionsContainer.appendChild(label);
+      });
+      
+      // Update progress
+      document.getElementById('progress').style.width = `${(currentQuestion / questions.length) * 100}%`;
+      document.getElementById('progress-text').textContent = `${currentQuestion}/${questions.length}`;
+      
+      // Clear feedback
+      document.getElementById('feedback').style.display = 'none';
+    }
+    
+    // Check answer
+    function checkAnswer() {
+      const selectedOption = document.querySelector('input[name="answer"]:checked');
+      const feedback = document.getElementById('feedback');
+      
+      if (!selectedOption) {
+        feedback.textContent = 'Silakan pilih jawaban terlebih dahulu.';
+        feedback.className = 'feedback incorrect';
+        feedback.style.display = 'block';
+        return;
+      }
+      
+      const selectedAnswer = parseInt(selectedOption.value);
+      const correctAnswer = questions[currentQuestion].answer;
+      
+      if (selectedAnswer === correctAnswer) {
+        feedback.textContent = '✅ Benar! Jawaban Anda tepat.';
+        feedback.className = 'feedback correct';
+        score++;
+      } else {
+        feedback.textContent = `❌ Salah. Jawaban yang benar adalah: ${questions[currentQuestion].options[correctAnswer]}`;
+        feedback.className = 'feedback incorrect';
+      }
+      
+      feedback.style.display = 'block';
+      
+      // Move to next question or show results
+      setTimeout(() => {
+        currentQuestion++;
+        
+        if (currentQuestion < questions.length) {
+          loadQuestion();
+        } else {
+          showResults();
+        }
+      }, 2000);
+    }
+    
+    // Show quiz results
+    function showResults() {
+      const quizContainer = document.querySelector('.quiz');
+      quizContainer.innerHTML = `
+        <h3>Hasil Kuis</h3>
+        <p>Anda menjawab <strong>${score}</strong> dari <strong>${questions.length}</strong> pertanyaan dengan benar.</p>
+        <p>Nilai: <strong>${(score / questions.length) * 100}</strong></p>
+        <button onclick="location.reload()"><i class="fas fa-redo"></i> Coba Lagi</button>
+      `;
+    }
+    
+    // Initialize canvas simulation
+    const canvas = document.getElementById('network-canvas');
+    const ctx = canvas.getContext('2d');
+    let animationId = null;
+    let currentTopology = 'star';
+    
+    function resizeCanvas() {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    }
+    
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+    
+    function changeTopology(topology) {
+      currentTopology = topology;
+      stopSimulation();
+      drawNetwork();
+    }
+    
+    function startSimulation() {
+      stopSimulation();
+      drawNetwork();
+      animate();
+    }
+    
+    function stopSimulation() {
+      if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+      }
+      drawNetwork();
+    }
+    
+    function drawNetwork() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw based on current topology
+      switch(currentTopology) {
+        case 'bus':
+          drawBusTopology();
+          break;
+        case 'star':
+          drawStarTopology();
+          break;
+        case 'ring':
+          drawRingTopology();
+          break;
+      }
+    }
+    
+    function drawBusTopology() {
+      const centerY = canvas.height / 2;
+      const busLineY = centerY;
+      
+      // Draw bus line
+      ctx.beginPath();
+      ctx.moveTo(50, busLineY);
+      ctx.lineTo(canvas.width - 50, busLineY);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+      
+      // Draw devices
+      const deviceCount = 6;
+      const spacing = (canvas.width - 100) / (deviceCount - 1);
+      
+      for (let i = 0; i < deviceCount; i++) {
+        const x = 50 + i * spacing;
+        
+        // Draw connection to bus
+        ctx.beginPath();
+        ctx.moveTo(x, busLineY);
+        ctx.lineTo(x, busLineY - 80);
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Draw device
+        ctx.beginPath();
+        ctx.arc(x, busLineY - 100, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#3aafa9';
+        ctx.fill();
+        ctx.strokeStyle = '#2b7a78';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw device icon
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💻', x, busLineY - 100);
+      }
+    }
+    
+    function drawStarTopology() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      
+      // Draw hub/switch
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, 30, 0, Math.PI * 2);
+      ctx.fillStyle = '#ff6b6b';
+      ctx.fill();
+      ctx.strokeStyle = '#d33';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      ctx.font = '16px Arial';
+      ctx.fillStyle = 'white';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('🔀', centerX, centerY);
+      
+      // Draw devices
+      const deviceCount = 6;
+      const radius = Math.min(canvas.width, canvas.height) * 0.35;
+      
+      for (let i = 0; i < deviceCount; i++) {
+        const angle = (i * 2 * Math.PI / deviceCount) - Math.PI/2;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        
+        // Draw connection to hub
+        ctx.beginPath();
+        ctx.moveTo(centerX, centerY);
+        ctx.lineTo(x, y);
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+        
+        // Draw device
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#3aafa9';
+        ctx.fill();
+        ctx.strokeStyle = '#2b7a78';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw device icon
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💻', x, y);
+      }
+    }
+    
+    function drawRingTopology() {
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = Math.min(canvas.width, canvas.height) * 0.35;
+      
+      // Draw ring
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius, 0, Math.PI * 2);
+      ctx.strokeStyle = '#333';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Draw devices
+      const deviceCount = 6;
+      
+      for (let i = 0; i < deviceCount; i++) {
+        const angle = i * 2 * Math.PI / deviceCount;
+        const x = centerX + radius * Math.cos(angle);
+        const y = centerY + radius * Math.sin(angle);
+        
+        // Draw device
+        ctx.beginPath();
+        ctx.arc(x, y, 20, 0, Math.PI * 2);
+        ctx.fillStyle = '#3aafa9';
+        ctx.fill();
+        ctx.strokeStyle = '#2b7a78';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        
+        // Draw device icon
+        ctx.font = '16px Arial';
+        ctx.fillStyle = 'white';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('💻', x, y);
+        
+        // Draw connection to next device
+        const nextAngle = (i + 1) % deviceCount * 2 * Math.PI / deviceCount;
+        const nextX = centerX + radius * Math.cos(nextAngle);
+        const nextY = centerY + radius * Math.sin(nextAngle);
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(nextX, nextY);
+        ctx.strokeStyle = '#666';
+        ctx.lineWidth = 1;
+        ctx.stroke();
+      }
+    }
+    
+    function animate() {
+      // Animation logic would go here
+      // For now, we'll just redraw the network
+      drawNetwork();
+      animationId = requestAnimationFrame(animate);
+    }
+    
+    // Initialize the page
+    window.onload = function() {
+      loadQuestion();
+      drawNetwork();
+    };
+  </script>
+
+</body>
+</html>
